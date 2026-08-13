@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+build_tmp/
+dist/
+Saida/
+logs/
+*.spec
+playwright-browsers/
+.venv/
+venv/

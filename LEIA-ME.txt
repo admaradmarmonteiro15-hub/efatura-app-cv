@@ -1,0 +1,73 @@
+eFatura App - Preenchimento automatico do mapa de controlo
+=============================================================
+
+COMO USAR
+---------
+1. Faz duplo clique em "eFatura_App.exe" (versao compilada) ou corre
+   "python eFatura_App.py" (versao a partir do codigo-fonte).
+2. Preenche:
+   - NIF do cliente
+   - Password do site eFatura (a mesma que usam para entrar em pe.efatura.cv)
+   - Mes no formato AAAA-MM (ex: 2026-05)
+   - Marca as caixas "Receção (compras)" e/ou "Emissão (vendas)" consoante
+     o mapa que precisas (por defeito as duas vêm marcadas)
+3. Carrega em "Processar".
+4. Aguarda - o programa faz login no portal, descarrega os XML de todas as
+   faturas do mes e gera o(s) ficheiro(s) Excel. Isto pode demorar alguns
+   minutos se a empresa tiver muitos documentos (é normal aparecerem linhas
+   de "Tentativa X/4 falhou..." no log - o programa repete automaticamente).
+5. Quando aparecer "TUDO PRONTO!", o(s) ficheiro(s) Excel ficam guardados na
+   pasta "Saida" (ao lado do .exe/script), com os nomes:
+       Faturas controlo {empresa} {mes} - Recebidas.xlsx  (faturas de compra)
+       Faturas controlo {empresa} {mes} - Emitidas.xlsx   (faturas de venda)
+
+O que o Excel contem: uma linha por fatura/fatura-recibo do mes. No mapa de
+Recebidas as colunas sao "fornecedor"/"nif_fornecedor" (quem emitiu a
+fatura); no mapa de Emitidas sao "cliente"/"nif_cliente" (quem recebeu a
+fatura). Alem disso: numero do documento, descricao, valores, IVA,
+retencao (coluna "retencao_arredondado" - retencao na fonte, quando a
+fatura tiver), etc., no mesmo formato usado pela contabilidade. NAO inclui
+sugestao de conta contabilistica - essa classificacao continua a ser feita
+manualmente depois.
+
+Alem do Excel, o programa tambem guarda o XML e o PDF de cada fatura, dentro
+de "Saida\01_Documentos_fiscais\{empresa}\{mes}\Rececao\" (ou "Emissao"):
+   - os ficheiros .xml ficam diretamente nessa pasta (sao os dados-fonte
+     usados para gerar o Excel)
+   - os ficheiros .pdf (a fatura como documento visual/imprimivel) ficam
+     numa subpasta "PDF\" dentro dela
+Se ocasionalmente faltar o PDF de algum documento (falha de rede), o
+programa avisa no log mas continua sem problemas - o Excel e o XML nao sao
+afetados.
+
+INSTALACAO A PARTIR DO CODIGO-FONTE
+------------------------------------
+1. Python 3.11+ instalado.
+2. pip install -r requirements.txt
+3. python -m playwright install chromium
+4. python eFatura_App.py
+
+Para gerar um executavel standalone (Windows), usa o PyInstaller:
+   pyinstaller --onefile --windowed --name eFatura_App eFatura_App.py
+Depois copia manualmente uma pasta "playwright-browsers" com o Chromium
+(gerado por "playwright install --with-deps chromium" com
+PLAYWRIGHT_BROWSERS_PATH apontado para essa pasta) para junto do .exe, para
+quem for usar o executavel nao precisar de instalar Python nem Playwright.
+
+IMPORTANTE (versao .exe): NAO APAGAR NEM MOVER FICHEIROS/PASTAS
+-------------------------------------------------------------------
+Esta pasta tem de se manter completa e junta (nao apagar nem mover nada
+para fora dela):
+   - eFatura_App.exe
+   - playwright-browsers\  (o navegador que o programa usa para o login)
+   - Saida\   (onde os resultados sao guardados - criada automaticamente)
+
+Se copiares o programa para outro computador, copia a PASTA INTEIRA, nao
+so o .exe.
+
+PROBLEMAS COMUNS
+-------------------
+- "Nao foi possivel capturar o token de autenticacao" -> NIF ou password
+  errados, ou o portal eFatura esta em baixo.
+- O programa demora muito -> normal se a empresa tiver muitos documentos
+  (o portal so deixa descarregar um de cada vez); nao fechar a janela.
